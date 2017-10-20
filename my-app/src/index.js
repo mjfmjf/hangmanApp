@@ -5,17 +5,64 @@ import './index.css';
 var correctWord="test";
 var triesLeft=0;
 var beginningOfGame=true; 
+var wordLength=3;
 
-class Square extends React.Component {
-  render() {
+function Square (props){
+
     return (
-      <h1 className="square">
-        {'X'}
-      </h1>
+      <div className="square">
+        {props.value}
+      </div>
+    );
+}
+
+class Letter extends React.Component{
+  constructor(props) {
+    super(props);
+    this.state = {value: ''};
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+  handleSubmit(event) {
+    event.preventDefault();
+    this.setState({ value: this.element.value });
+    beginningOfGame=false;
+  }
+  render(){
+    return(
+      <div>
+      <form onSubmit={this.handleSubmit}>
+      <p>Enter a letter to guess: </p>
+        <label>
+          <input type="text" maxLength="1" ref={el => this.element = el} />
+        </label>
+        <input type="submit" value="Submit" />
+      </form>
+  
+      <ShowWord userLetter = {this.state.value} />
+      </div>
     );
   }
 }
 
+class ShowWord extends React.Component{
+  constructor(props) {
+    super(props);
+    this.props= {value: 'test'};
+    this.checkForLetter();
+  }
+
+  checkForLetter(){
+    var letter=this.props.userLetter; 
+  }
+  
+
+  render() {
+    return (
+      <p>{this.props.userLetter}</p>
+    );
+  
+  }
+}
 class Useranswer extends React.Component{
   constructor(props) {
     super(props);
@@ -48,37 +95,6 @@ class Useranswer extends React.Component{
   }
 }
 
-class Useranswer extends React.Component{
-  constructor(props) {
-    super(props);
-    this.state = {value: ''};
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
-    this.setState({ value: this.element.value });
-    beginningOfGame=false;
-  }
-
-  render() {
-    return (
-      <div>
-      <form onSubmit={this.handleSubmit}>
-      <p>Want to try and submit a guess?</p>
-        <label>
-          <input type="text" ref={el => this.element = el} />
-        </label>
-        <input type="submit" value="Submit" />
-      </form>
-      <p>{"Your answer is: "+ this.state.value }</p>
-      
-    {!beginningOfGame ? (<IsCorrect answer={this.state.value} />) : 'test' }
-      </div>
-
-    );
-  }
-}
 
 class IsCorrect extends React.Component{
   render(){
@@ -96,34 +112,37 @@ class IsCorrect extends React.Component{
     )
   }
 }
+var squareArray=[];
+var word=['A','B','C'];
+function createEmptyWord(){
+     for (var i=0; i<wordLength; i++){
+        squareArray.push(<Square value={this.props.square[word(i)]}/>)
+      }
+  return (
+   
+    squareArray 
+  );
+}
+
 class Board extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      squares: Array(9).fill(null),
-    };
-  }
-  renderSquare(i) {
-    return (
-      <Square 
-      />
-    );
+ 
+  renderSquare() {
+   
+    for (var i=0; i<wordLength; i++){
+      squareArray.push(<Square i={word[i]}/>)
+    }
+return (
+ 
+  squareArray 
+);
+   
   }
 
   render() {
-    const status = 'Next player: X';
-
     return (
       <div>
-        <div className="status">{status}</div>
         <div className="board-row">
-          {this.renderSquare(0)}{this.renderSquare(1)}{this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}{this.renderSquare(4)}{this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}{this.renderSquare(7)}{this.renderSquare(8)}
+              {this.renderSquare()}
         </div>
       </div>
     );
@@ -131,16 +150,56 @@ class Board extends React.Component {
 }
 
 class Game extends React.Component {
+  constructor() {
+    super();
+    this.state = {
+      history: [
+        {
+          squares: Array(9).fill(null)
+        }
+      ],
+      stepNumber: 0,
+    };
+  }
+
   render() {
+  
+
     return (
       <div className="game">
+        <div><Letter /> <br /> 
+          </div>
+        <div>
         <Useranswer />
-        
+        </div> 
+        <Board onSubmit={i=>this.handleSubmit(i)}/>
       </div>
      
     );
   }
 }
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
+
+
 
 // ========================================
 
